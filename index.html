@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>408 真题考点分析</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2937; --muted:#6b7280;
+    --border:#e5e7eb; --accent:#2563eb;
+    --ds:#2563eb; --cc:#7c3aed; --os:#059669; --net:#d97706;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  a{color:var(--accent)}
+
+  /* ---------- Header ---------- */
+  header{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#3b82f6 100%);color:#fff;padding:44px 20px 36px;text-align:center}
+  header h1{font-size:30px;letter-spacing:2px;margin-bottom:10px}
+  header p{opacity:.9;font-size:15px;max-width:720px;margin:0 auto}
+  .stats{display:flex;gap:14px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+  .stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:8px 20px;font-size:14px}
+  .stat b{font-size:20px;margin-right:6px}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{max-width:1080px;margin:-18px auto 0;padding:0 16px;position:relative;z-index:5}
+  .toolbar-inner{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(30,58,138,.08);padding:14px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{border:1px solid var(--border);background:#f9fafb;border-radius:999px;padding:6px 16px;font-size:14px;cursor:pointer;transition:.2s;color:var(--muted)}
+  .tab:hover{border-color:var(--accent);color:var(--accent)}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .search{flex:1;min-width:200px}
+  .search input{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;outline:none;background:#f9fafb}
+  .search input:focus{border-color:var(--accent);background:#fff}
+
+  /* ---------- Layout ---------- */
+  main{max-width:1080px;margin:24px auto 60px;padding:0 16px;display:grid;grid-template-columns:1fr 260px;gap:24px;align-items:start}
+  @media (max-width:900px){main{grid-template-columns:1fr}.sidebar{display:none}}
+
+  /* ---------- Question Card ---------- */
+  .qcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .qhead{padding:18px 20px 14px;border-left:5px solid var(--accent)}
+  .qcard[data-sub="ds"] .qhead{border-color:var(--ds)} .qcard[data-sub="cc"] .qhead{border-color:var(--cc)}
+  .qcard[data-sub="os"] .qhead{border-color:var(--os)} .qcard[data-sub="net"] .qhead{border-color:var(--net)}
+  .qmeta{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .badge{font-size:12px;border-radius:6px;padding:2px 9px;font-weight:600}
+  .badge.year{background:#eef2ff;color:#3730a3}
+  .qcard[data-sub="ds"] .badge.sub{background:#dbeafe;color:var(--ds)}
+  .qcard[data-sub="cc"] .badge.sub{background:#ede9fe;color:var(--cc)}
+  .qcard[data-sub="os"] .badge.sub{background:#d1fae5;color:var(--os)}
+  .qcard[data-sub="net"] .badge.sub{background:#fef3c7;color:var(--net)}
+  .badge.pt{background:#fef2f2;color:#b91c1c}
+  .qtitle{font-size:16px;font-weight:700;margin-bottom:8px}
+  .qstem{font-size:14px;color:#374151;background:#f8fafc;border:1px dashed var(--border);border-radius:10px;padding:12px 14px}
+  .qstem code, .detail code{background:#eef2f7;border-radius:4px;padding:1px 5px;font-family:Consolas,Menlo,monospace;font-size:13px}
+
+  .toggle{display:block;width:100%;text-align:center;padding:11px;background:#f9fafb;border:none;border-top:1px solid var(--border);color:var(--accent);font-size:14px;font-weight:600;cursor:pointer}
+  .toggle:hover{background:#eff6ff}
+
+  .detail{display:none;border-top:1px solid var(--border)}
+  .qcard.open .detail{display:block}
+
+  /* tabs inside card */
+  .dtabs{display:flex;border-bottom:1px solid var(--border);background:#fbfcfe}
+  .dtab{flex:1;padding:10px 4px;text-align:center;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:.2s;background:none;border-top:none;border-left:none;border-right:none}
+  .dtab:hover{color:var(--accent)}
+  .dtab.active{color:var(--accent);border-bottom-color:var(--accent);background:#fff}
+  .dpanel{display:none;padding:18px 20px;font-size:14px}
+  .dpanel.active{display:block}
+  .dpanel h4{font-size:14px;margin:14px 0 6px;color:#111827}
+  .dpanel h4:first-child{margin-top:0}
+  .dpanel ul{padding-left:20px;color:#374151}
+  .dpanel li{margin-bottom:5px}
+  .step{display:flex;gap:10px;margin-bottom:10px}
+  .step .num{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;font-weight:700;margin-top:2px}
+  .tpl{background:#eff6ff;border:1px dashed #93c5fd;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#1e40af;line-height:1.8}
+  .tpl b{color:#1d4ed8}
+  .kp{display:inline-block;background:#f1f5f9;border:1px solid var(--border);border-radius:6px;padding:2px 10px;margin:0 6px 6px 0;font-size:13px;color:#334155}
+
+  /* ---------- 高频考点总览（实时统计视图） ---------- */
+  .kp-head{margin-bottom:18px}
+  .kp-head h2{font-size:22px;margin-bottom:6px}
+  .kp-head p{font-size:13px;color:var(--muted)}
+  .kp-head .kp-tip{margin-top:8px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:6px 12px;display:inline-block}
+  .kp-row{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:10px;cursor:pointer;transition:.15s}
+  .kp-row:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(37,99,235,.12);transform:translateY(-1px)}
+  .kp-row .rank{flex:none;width:30px;height:30px;border-radius:8px;background:#f1f5f9;color:#475569;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .kp-row .rank.top{background:var(--accent);color:#fff}
+  .kp-info{flex:1;min-width:0}
+  .kp-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .kp-name{font-weight:700;font-size:15px}
+  .mini-badge{font-size:11px;border-radius:5px;padding:1px 7px;font-weight:600}
+  .mini-badge.ds{background:#dbeafe;color:var(--ds)} .mini-badge.cc{background:#ede9fe;color:var(--cc)}
+  .mini-badge.os{background:#d1fae5;color:var(--os)} .mini-badge.net{background:#fef3c7;color:var(--net)}
+  .kp-line .kp-cnt{margin-left:auto;color:var(--accent);font-weight:700;font-size:14px}
+  .kp-bar{height:6px;background:#eef2f7;border-radius:3px;overflow:hidden;margin-bottom:5px}
+  .kp-bar i{display:block;height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb);border-radius:3px}
+  .kp-years{font-size:12px;color:var(--muted)}
+  .kp-back{display:block;width:100%;background:#eff6ff;border:1px dashed #93c5fd;color:#1d4ed8;font-weight:700;border-radius:10px;padding:10px;margin-bottom:14px;cursor:pointer;font-size:14px}
+  .kp-back:hover{background:#dbeafe}
+  pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.6;margin:8px 0}
+  pre .cm{color:#94a3b8} pre .kw{color:#7dd3fc} pre .fn{color:#fbbf24}
+  .ans{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;color:#14532d}
+  .pitfall{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;margin-top:10px;color:#9a3412;font-size:13px}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{position:sticky;top:20px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  .panel h3{font-size:15px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .legend-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:#374151}
+  .dot{width:12px;height:12px;border-radius:50%}
+  footer{text-align:center;color:var(--muted);font-size:13px;padding:20px 0 40px}
+  .empty{text-align:center;color:var(--muted);padding:60px 0;font-size:15px;display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>计算机考研 408 真题考点分析</h1>
+  <p>每道真题从四个维度拆解：<b>考点识别</b> → <b>解题方法</b> → <b>知识点详解</b> → <b>参考答案</b>，帮助你从「会做一道题」到「吃透一类题」。</p>
+  <div class="stats">
+    <div class="stat"><b id="statTotal">0</b>道真题</div>
+    <div class="stat"><b>4</b>大学科</div>
+    <div class="stat"><b id="statKp">0</b>个核心考点</div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <div class="tabs" id="subjectTabs">
+      <button class="tab active" data-sub="all">全部</button>
+      <button class="tab" data-sub="ds">数据结构</button>
+      <button class="tab" data-sub="cc">计算机组成原理</button>
+      <button class="tab" data-sub="os">操作系统</button>
+      <button class="tab" data-sub="net">计算机网络</button>
+    </div>
+    <div class="tabs" id="yearTabs" style="width:100%">
+      <button class="tab active" data-year="all">全部年份</button>
+    </div>
+    <div class="search">
+      <input id="searchBox" type="text" placeholder="🔍 搜索题目 / 考点 / 知识点，如：链表、Cache、PV 操作、TCP…">
+    </div>
+  </div>
+</div>
+
+<main>
+  <div id="questionList"></div>
+  <div class="empty" id="emptyTip">没有匹配的题目，换个关键词试试～</div>
+
+  <aside class="sidebar">
+    <div class="panel">
+      <h3>科目图例</h3>
+      <div class="legend-item"><span class="dot" style="background:var(--ds)"></span>数据结构（45 分）</div>
+      <div class="legend-item"><span class="dot" style="background:var(--cc)"></span>计算机组成原理（45 分）</div>
+      <div class="legend-item"><span class="dot" style="background:var(--os)"></span>操作系统（35 分）</div>
+      <div class="legend-item"><span class="dot" style="background:var(--net)"></span>计算机网络（25 分）</div>
+    </div>
+    <div class="panel">
+      <h3>💡 408 大题得分心法</h3>
+      <ul style="padding-left:18px;font-size:13px;color:#374151">
+        <li>先看<b>问题</b>再看题干，带着目标读题</li>
+        <li>算法大题先写<b>算法思想</b>，再写代码，最后写复杂度分析</li>
+        <li>计算题把<b>单位换算</b>和公式来源写清楚，按步骤给分</li>
+        <li>PV 操作题先列<b>信号量含义表</b>再写代码，逻辑不易乱</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>📌 高频考点排行 <span style="font-weight:400;font-size:12px;color:var(--muted)">实时联动筛选</span></h3>
+      <div style="font-size:13px;color:#374151" id="hotKp"></div>
+    </div>
+  </aside>
+</main>
+
+<footer>持续收录中 · 建议配合历年真题卷食用 · 祝上岸 🎓</footer>
+
+<script src="questions.js"></script>
+<script src="data/year_2026.js"></script>
+<script src="data/year_2010.js"></script>
+<script src="data/year_2011.js"></script>
+<script src="data/year_2025.js"></script>
+<script src="data/year_2024.js"></script>
+<script src="data/year_2023.js"></script>
+<script src="data/year_2022.js"></script>
+<script src="data/year_2021.js"></script>
+<script src="data/year_2020.js"></script>
+<script src="data/year_2019.js"></script>
+<script src="data/year_2018.js"></script>
+<script src="data/year_2017.js"></script>
+<script src="data/year_2016.js"></script>
+<script src="data/year_2015.js"></script>
+<script src="data/year_2014.js"></script>
+<script src="data/year_2013.js"></script>
+<script src="data/year_2012.js"></script>
+<script src="data/year_2009.js"></script>
+<script>
+
+/* ---------- Render ---------- */
+/* 题号数值化：第2题 < 第10题 */
+const list = document.getElementById('questionList');
+const emptyTip = document.getElementById('emptyTip');
+
+/* 合并各年份数据文件（新增年份：加 script 标签 + 在此处合并），并做字段防御性归一化 */
+const ALL_QUESTIONS = [
+  ...(typeof QUESTIONS!=='undefined' ? QUESTIONS : []),          // 散题（尚未成套录入年份的真题）
+  ...(typeof QUESTIONS_2026!=='undefined' ? QUESTIONS_2026 : []), // 2026
+  ...(typeof QUESTIONS_2010!=='undefined' ? QUESTIONS_2010 : []), // 2010
+  ...(typeof QUESTIONS_2011!=='undefined' ? QUESTIONS_2011 : []), // 2011
+  ...(typeof QUESTIONS_2025!=='undefined' ? QUESTIONS_2025 : []), // 2025
+  ...(typeof QUESTIONS_2024!=='undefined' ? QUESTIONS_2024 : []), // 2024
+  ...(typeof QUESTIONS_2023!=='undefined' ? QUESTIONS_2023 : []), // 2023
+  ...(typeof QUESTIONS_2022!=='undefined' ? QUESTIONS_2022 : []), // 2022
+  ...(typeof QUESTIONS_2021!=='undefined' ? QUESTIONS_2021 : []), // 2021
+  ...(typeof QUESTIONS_2020!=='undefined' ? QUESTIONS_2020 : []), // 2020
+  ...(typeof QUESTIONS_2019!=='undefined' ? QUESTIONS_2019 : []), // 2019
+  ...(typeof QUESTIONS_2018!=='undefined' ? QUESTIONS_2018 : []), // 2018
+  ...(typeof QUESTIONS_2017!=='undefined' ? QUESTIONS_2017 : []), // 2017
+  ...(typeof QUESTIONS_2016!=='undefined' ? QUESTIONS_2016 : []), // 2016
+  ...(typeof QUESTIONS_2015!=='undefined' ? QUESTIONS_2015 : []), // 2015
+  ...(typeof QUESTIONS_2014!=='undefined' ? QUESTIONS_2014 : []), // 2014
+  ...(typeof QUESTIONS_2013!=='undefined' ? QUESTIONS_2013 : []), // 2013
+  ...(typeof QUESTIONS_2012!=='undefined' ? QUESTIONS_2012 : []), // 2012
+  ...(typeof QUESTIONS_2009!=='undefined' ? QUESTIONS_2009 : [])  // 2009
+].map(q=>{
+  const o = Object.assign({signals:[], method:[], kps:[], code:'', pitfall:'', identify:{}, tpl:''}, q);
+  o.identify = { brief: (o.identify && o.identify.brief) || '', signals: (o.identify && o.identify.signals) || [] };
+  o.method = o.method || []; o.kps = o.kps || []; o.points = o.points || [];
+  return o;
+});
+
+/* 年份索引：数字年份降序（最新在前），"高频考点"精选放最后 */
+const yearList = [...new Set(ALL_QUESTIONS.map(q=>String(q.year)))].sort((a,b)=>{
+  if(a==='高频') return 1; if(b==='高频') return -1;
+  return parseInt(b)-parseInt(a);
+});
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderCard(q,i){
+  const identifyHTML = `<p>${q.identify.brief}</p>` +
+    (q.identify.signals.length?`<h4>🔍 题眼信号</h4><ul>${q.identify.signals.map(s=>`<li>${s}</li>`).join('')}</ul>`:'');
+  const methodHTML = (q.tpl?`<div class="tpl"><b>🧰 通用模板 · 此类题通吃</b><br>${q.tpl}</div>`:'') +
+    `<h4>本题解法步骤</h4>` +
+    q.method.map((m,i)=>`<div class="step"><span class="num">${i+1}</span><div>${m}</div></div>`).join('');
+  const kpHTML = q.kps.map(k=>`<h4>📘 ${k.name}</h4><p>${k.detail}</p>`).join('') +
+    `<h4>本题考点标签</h4><p>${q.points.map(p=>`<span class="kp">${p}</span>`).join('')}</p>`;
+  const codeHTML = (q.code?`<h4>💻 参考代码 / 公式速查</h4><pre>${q.code}</pre>`:'') +
+    `<div class="ans"><b>✅ 参考答案：</b>${q.answer}</div>` +
+    (q.pitfall?`<div class="pitfall"><b>⚠️ 易错点：</b>${q.pitfall}</div>`:'');
+  const yearBadge = q.year==='高频' ? '📌 高频考点' : `${q.year}年真题`;
+
+  return `<article class="qcard" data-idx="${i}" data-sub="${q.sub}" data-year="${q.year}" data-text="${esc((q.title+q.stem+q.points.join(' ')+' '+q.subName).toLowerCase())}">
+    <div class="qhead">
+      <div class="qmeta">
+        <span class="badge sub">${q.subName}</span>
+        <span class="badge year">${yearBadge}</span>
+        <span class="badge pt">${q.no}${q.points[0]?' · '+q.points[0]:''}</span>
+      </div>
+      <div class="qtitle">${q.title}</div>
+      <div class="qstem">${q.stem}</div>
+    </div>
+    <div class="detail">
+      <div class="dtabs">
+        <button class="dtab active" data-p="0">🎯 考点识别</button>
+        <button class="dtab" data-p="1">🧩 解题方法</button>
+        <button class="dtab" data-p="2">📚 知识点详解</button>
+        <button class="dtab" data-p="3">✅ 答案与代码</button>
+      </div>
+      <div class="dpanel active">${identifyHTML}</div>
+      <div class="dpanel">${methodHTML}</div>
+      <div class="dpanel">${kpHTML}</div>
+      <div class="dpanel">${codeHTML}</div>
+    </div>
+    <button class="toggle">展开解析 ▾</button>
+  </article>`;
+}
+
+/* 排序：年份新→旧；同年内按题号第1题→第47题；无数字题号者排组内末尾 */
+const qno = q => { const m = String(q.no).match(/\d+/); return m ? +m[0] : 9999; };
+const ykey = q => /^\d{4}$/.test(String(q.year)) ? parseInt(q.year) : -1;
+
+/* 侧边栏高频考点排行：实时随筛选联动 */
+function renderHotKp(qs){
+  const cnt = {};
+  qs.forEach(q=>q.points.forEach(p=>cnt[p]=(cnt[p]||0)+1));
+  const rows = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  document.getElementById('hotKp').innerHTML = rows.length
+    ? rows.map(([k,c])=>`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>${k}</span><span style="color:var(--accent);font-weight:700">${c} 题</span></div>`).join('')
+    : '<div style="color:#9ca3af">当前筛选下暂无考点</div>';
+  document.getElementById('statKp').textContent = Object.keys(cnt).length;
+  document.getElementById('statTotal').textContent = qs.length;
+}
+
+/* 当前筛选命中的题目（科目 / 年份 / 关键词 / 考点下钻） */
+let curPoint = null;
+function currentFiltered(){
+  return ALL_QUESTIONS.filter(q=>{
+    const okSub = curSub==='all' || q.sub===curSub;
+    const okKw = !curKw || (q.title+' '+q.stem+' '+q.points.join(' ')+' '+q.subName+' '+(q.kps||[]).map(k=>k.name).join(' ')).toLowerCase().includes(curKw);
+    const okYear = curYear==='all' || curYear==='高频' || String(q.year)===curYear;
+    const okPoint = !curPoint || q.points.includes(curPoint);
+    return okSub && okKw && okYear && okPoint;
+  });
+}
+
+/* 高频考点总览：根据全部已收录年份的考点实时统计生成（非固定内容） */
+function renderKpOverview(qs){
+  const cnt={}, subs={}, years={};
+  qs.forEach(q=>q.points.forEach(p=>{
+    cnt[p]=(cnt[p]||0)+1;
+    (subs[p]=subs[p]||new Set()).add(q.sub);
+    if(/^\d{4}$/.test(String(q.year))) (years[p]=years[p]||new Set()).add(q.year);
+  }));
+  const rows = Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  const max = rows.length ? rows[0][1] : 1;
+  const subNames = {ds:'数据结构',cc:'组成原理',os:'操作系统',net:'计算机网络'};
+  const covered = [...new Set(qs.map(q=>String(q.year)).filter(y=>/^\d{4}$/.test(y)))].sort();
+  const head = `
+    <div class="kp-head">
+      <h2>📌 高频考点总览</h2>
+      <p>基于已收录 <b>${covered.length}</b> 年真题（${covered.join(' / ')}）<b>实时统计</b> · 当前范围 ${qs.length} 道题 · ${rows.length} 个考点</p>
+      <p class="kp-tip">💡 点击任意考点行，下钻查看该考点的全部真题解析；排行随筛选条件与后续录入年份自动更新</p>
+    </div>`;
+  const rowsHTML = rows.map(([k,c],i)=>{
+    const width = Math.max(6, Math.round(c/max*100));
+    const subBadges = [...(subs[k]||[])].map(s=>`<span class="mini-badge ${s}">${subNames[s]||s}</span>`).join(' ');
+    const yr = [...(years[k]||[])].sort().join(' · ');
+    return `<div class="kp-row" data-kp="${esc(k)}">
+      <div class="rank ${i<3?'top':''}">${i+1}</div>
+      <div class="kp-info">
+        <div class="kp-line"><span class="kp-name">${k}</span>${subBadges}<span class="kp-cnt">${c} 题</span></div>
+        <div class="kp-bar"><i style="width:${width}%"></i></div>
+        <div class="kp-years">出现年份：${yr||'—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<section class="kp-overview">${head}${rowsHTML || '<div class="empty" style="display:block">当前筛选下暂无考点</div>'}</section>`;
+}
+
+/* 列表渲染（考点下钻模式带返回条） */
+function renderList(qs){
+  let html = '';
+  if(curYear==='高频' && curPoint){
+    html += `<button class="kp-back">← 返回高频考点总览（当前考点：${esc(curPoint)}）</button>`;
+  }
+  html += qs.slice().sort((a,b)=> ykey(b)-ykey(a) || qno(a)-qno(b))
+    .map((q,i)=>renderCard(q,i)).join('');
+  return html;
+}
+
+function applyFilter(){
+  const qs = currentFiltered();
+  if(curYear==='高频' && !curPoint){
+    list.innerHTML = renderKpOverview(qs);   // 总览模式
+  } else {
+    list.innerHTML = renderList(qs);         // 题目列表模式
+  }
+  emptyTip.style.display = qs.length ? 'none' : 'block';
+  renderHotKp(qs);   // 实时更新侧边栏排行与页头统计
+}
+
+/* ---------- interactions ---------- */
+// year tabs（按收录情况生成：已收录年份可点，未收录的灰色禁用）
+const FULL_YEARS = [];
+for(let y=2009;y<=2026;y++) FULL_YEARS.push(String(y));
+const yearTabsEl = document.getElementById('yearTabs');
+yearTabsEl.innerHTML = `<button class="tab active" data-year="all">全部年份</button>` +
+  FULL_YEARS.map(y=>{
+    const has = yearList.includes(y);
+    return `<button class="tab" data-year="${y}" ${has?'':'disabled style="opacity:.35;cursor:not-allowed" title="尚未收录"'}>${y}</button>`;
+  }).join('') +
+  `<button class="tab" data-year="高频" title="根据已收录全部年份真题实时统计的高频考点">高频考点</button>`;
+yearTabsEl.addEventListener('click', e=>{
+  const btn = e.target.closest('.tab'); if(!btn || btn.disabled) return;
+  yearTabsEl.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  curYear = btn.dataset.year;
+  curPoint = null;   // 切换年份时退出考点下钻
+  applyFilter();
+});
+
+// subject filter
+let curSub = 'all', curKw = '', curYear = 'all';
+document.getElementById('subjectTabs').addEventListener('click', e=>{
+  const btn = e.target.closest('.tab'); if(!btn) return;
+  document.querySelectorAll('#subjectTabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  curSub = btn.dataset.sub;
+  applyFilter();
+});
+
+// search
+document.getElementById('searchBox').addEventListener('input', e=>{
+  curKw = e.target.value.trim().toLowerCase();
+  applyFilter();
+});
+
+// expand / collapse + 考点下钻
+list.addEventListener('click', e=>{
+  const back = e.target.closest('.kp-back');
+  if(back){ curPoint = null; applyFilter(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+  const kpr = e.target.closest('.kp-row');
+  if(kpr){ curPoint = kpr.dataset.kp; applyFilter(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+  if(e.target.classList.contains('toggle')){
+    const card = e.target.closest('.qcard');
+    card.classList.toggle('open');
+    e.target.textContent = card.classList.contains('open') ? '收起解析 ▴' : '展开解析 ▾';
+    return;
+  }
+  const tab = e.target.closest('.dtab');
+  if(tab){
+    const detail = tab.closest('.detail');
+    detail.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+    detail.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    detail.querySelectorAll('.dpanel')[+tab.dataset.p].classList.add('active');
+  }
+});
+
+/* 首次渲染：初始化筛选状态与实时排行 */
+applyFilter();
+</script>
+</body>
+</html>
